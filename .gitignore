@@ -9,6 +9,9 @@
 /test/version_tmp/
 /tmp/
 
+timestamp.txt
+corpus.txt
+
 ## Specific to RubyMotion:
 .dat*
 .repl_history

@@ -36,4 +36,13 @@ class Manager
 		puts 'published an ask!'
 	end
 
+	def followUser username
+		#when asked a question, our bot will add a user to a list of followed individuals
+		#because of the way tumblr is structured, sideblogs cannot have their own followers list
+		#So, we will overcome this by just adding names to a text file
+		File.open('following.txt','a') do |f|
+			f.puts username
+		end
+	end
+
 end

@@ -10,7 +10,7 @@ and then
 
 `rake migrate`
 
-You will need to manually adjust enviornment variables to suit your case.  They are currently:
+You will need to manually adjust environment variables to suit your case.  They are currently:
 
 `'TUMBLR_CONSUMER_KEY'`
 

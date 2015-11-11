@@ -1,10 +1,12 @@
 require_relative 'initialize.rb'
+tumbot = AsksController.new
 
 while true
-	AsksController.init
-	AsksController.check
-	AsksController.index
-	sleep 6
+	Thread.new do
+		tumbot.check
+		#tumbot.index
+		sleep 6
+	end
 end
 
 

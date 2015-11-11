@@ -18,8 +18,9 @@ class AsksController
 	end
 
 	def create ask, user, sentiment
-			#don't let people spam the same text over and over
+			#add punctuation
 			ask = ask + '.' if ask[-1, 1] != '.' and ask[-1, 1] != '!' and ask[-1, 1] != '?'
+			#don't let people spam the same text over and over
 			Ask.create_with(sentiment: sentiment).find_or_create_by(user: user, text: ask)
 	end
 

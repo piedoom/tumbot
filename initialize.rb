@@ -1,14 +1,16 @@
 require 'tumblr_client'
 require 'active_record'
 require 'sentimental'
+require_relative 'bot.rb'
 Dir["models/*.rb"].each {|file| require_relative file }
-Dir["controllers/*.rb"].each {|file| require_relative file }
+
+cfg = YAML.load(ERB.new(File.read('config/credentials.yml')).result)
 
 Tumblr.configure do |config|
-	config.consumer_key = ENV['TUMBLR_CONSUMER_KEY']
-	config.consumer_secret = ENV['TUMBLR_CONSUMER_SECRET']
-	config.oauth_token = ENV['TUMBLR_OAUTH_TOKEN']
-	config.oauth_token_secret = ENV['TUMBLR_OAUTH_TOKEN_SECRET']
+	config.consumer_key = cfg['consumer_key']
+	config.consumer_secret = cfg['consumer_secret']
+	config.oauth_token = cfg['oauth_token']
+	config.oauth_token_secret = cfg['oauth_secret']
 end
 
 ActiveRecord::Base.establish_connection(

@@ -1,5 +1,5 @@
 require_relative 'initialize.rb'
-tumbot = AsksController.new
+tumbot = Tumbot::Bot.new
 
 while true
 	#Thread.new do

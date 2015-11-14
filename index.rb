@@ -1,5 +1,6 @@
 require_relative 'initialize.rb'
-tumbot = AsksController.new
+require_relative 'bot.rb'
+tumbot = Tumbot::Bot.new
 
-tumbot.index
+puts tumbot.getEmotions
 

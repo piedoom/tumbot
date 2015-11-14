@@ -1,5 +1,5 @@
 # the blog that will read and publish asks
-username: 'doomybottest'
+username: <%= ENV['TUMBOT_USERNAME'] %>
 # the amount of asks to get with every request
 ask_get_limit: 6
 # the minimum amount of senteces to reply to an ask with

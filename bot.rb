@@ -6,7 +6,6 @@ require 'erb'
 module Tumbot 
 	class Bot
 		def initialize
-
 			@cnf = YAML.load(ERB.new(File.read('config/config.yml')).result)
 			# initialize our tumblr client
 			@client = Tumblr::Client.new
@@ -14,7 +13,8 @@ module Tumbot
 			# init the sentiment analysis tool
 			Sentimental.load_defaults
 			@sen = Sentimental.new(0)
-			# init corpus so marky doesn't complain.  We need a few seed words if we don't have any.
+			# init corpus so marky doesn't complain.  
+			# We need a few seed words if we don't have any.
 			open('corpus.txt','w'){|f| f.puts 'this is some thing it is yes no'} unless File.file?('corpus.txt')
 		end
 	

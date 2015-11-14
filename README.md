@@ -10,19 +10,15 @@ and then
 
 `rake migrate`
 
-You will need to manually adjust environment variables to suit your case.  They are currently:
+Configuring the bot is easy enough - all files you need are included in the `config` directory.
 
-`'TUMBLR_CONSUMER_KEY'`
+`config.yml` specifies the bot's behavior
 
-`'TUMBLR_CONSUMER_SECRET'`
+`credentials.yml` specifies the Tumblr API credentials
 
-`'TUMBLR_OAUTH_TOKEN'`
+`database.yml` gives the settings for ActiveRecord.  They work as-is, but you can change them if you'd rather work with Postgres or MySQL.  
 
-`'TUMBLR_OAUTH_TOKEN_SECRET'`
-
-and
-
-`'TUMBLR_BOT_BLOG_NAME'` which is the name of the blog you are posting to, for example "bot.tumblr.com"
+Both `config.yml` and `credentials.yml` allow for embedded ruby.
 
 
 ##Running

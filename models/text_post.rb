@@ -14,6 +14,9 @@ class TextPost
 		doc.search('a').each do |a|
 			a.parent.remove
 		end
+		doc.search('img').each do |img|
+			img.parent.remove
+		end
 		values = (doc.css("p"))
 
 		#stuff we can add to the database

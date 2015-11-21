@@ -35,6 +35,13 @@ module Tumbot
 			end
 		end
 	
+		def create_ask ask, user
+			#ask = ask + '.' if ask[-1,1] !~ /(\!|\.|\?)/
+			sentiment = $SEN.get_score(ask)
+			Ask.create_with(sentiment: sentiment).find_or_create_by(user: user, text: Sanitize.fragment(ask))
+			puts "Added ask #{Sanitize.fragment(ask)} by #{user}"
+		end
+
 		def reply ask_id
 			# build our dictionary
 			$client.edit $USERNAME, id: "#{ask_id}", answer: generate_response, state: 'published'
@@ -54,6 +61,11 @@ module Tumbot
 				post = get_text_post user, 1, 1
 				if post != false
 					if okay_to_reblog? post.body
+						# add to database
+						post.content.each do |value|
+							create_ask value, nil
+						end
+						# reblog
 						reblog(id: post.id, reblog_key: post.reblog_key, comment: generate_response)
 					else
 					  reblog_random_text_post

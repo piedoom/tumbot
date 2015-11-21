@@ -1,4 +1,5 @@
 require 'sanitize'
+require_relative 'models/text_post.rb'
 module Tumbot
 	class Helper
 		# get a random user from the database
@@ -34,13 +35,6 @@ module Tumbot
 					 return false
 				 end
 			 end
-		end
-
-		def create_ask text, user
-			ask += '.' if ask[-1,1] !~ /(\!|\.|\?)/
-			sentiment = $SEN.get_score(text) 
-			Ask.create_with(sentiment: sentiment).find_or_create_by(user: user, text: Sanitize.fragment(text))
-			puts "Added ask #{Sanitize.fragment(text)} by #{user}"
 		end
 	end
 end

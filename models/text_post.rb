@@ -11,9 +11,12 @@ class TextPost
 		@body = post['posts'][0]['body']
 		
 		doc = Nokogiri::HTML(@body)
+		doc.search('a').each do |a|
+			a.parent.remove
+		end
 		values = (doc.css("p"))
 
 		#stuff we can add to the database
-		@content = values
+		@content = values.to_a
 	end
 end

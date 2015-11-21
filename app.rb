@@ -8,5 +8,3 @@ while true
 		sleep 6
 	#end
 end
-
-

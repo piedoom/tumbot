@@ -47,6 +47,8 @@ module Tumbot
 			puts 'published an ask!'
 		end
 
+
+
  	 #find or create a user
 		def createUser username
 			User.find_or_create_by(username: username)

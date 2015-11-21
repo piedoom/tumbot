@@ -1,22 +1,26 @@
 require 'marky_markov'
 require 'yaml'
 require 'erb'
+require_relative 'helper.rb'
 
 #settings class for our tumblr bot
 module Tumbot 
+	cnf = YAML.load(ERB.new(File.read('config/config.yml')).result)
+	$USERNAME = cnf['username']
+	$REPLY_RANDOMNESS = cnf['reply_randomness']
+	$ASK_GET_LIMIT = cnf['ask_get_limit']
+	$ASK_MIN_SENTENCES = cnf['ask_min_sentences']
+	$ASK_MAX_SENTENCES = cnf['ask_max_sentences']
+	$EMOTIONAL_MEMORY = cnf['emotional_memory']
+
 	class Bot
 		def initialize
-			@cnf = YAML.load(ERB.new(File.read('config/config.yml')).result)
+			$client = Tumblr::Client.new
 			# initialize our tumblr client
-			@client = Tumblr::Client.new
-			@markov = MarkyMarkov::TemporaryDictionary.new(@cnf['reply_randomness'])
-			@blacklist = ['suicide','don\'t reblog', 'dont reblog', 'tw', 'depression', 'personal', 'lgbt', 'rape']
+			@markov = MarkyMarkov::TemporaryDictionary.new($REPLY_RANDOMNESS)
 			# init the sentiment analysis tool
 			Sentimental.load_defaults
 			@sen = Sentimental.new(0)
-			# init corpus so marky doesn't complain.  
-			# We need a few seed words if we don't have any.
-			open('corpus.txt','w'){|f| f.puts 'this is some thing it is yes no'} unless File.file?('corpus.txt')
 		end
 	
 		def create ask, user, sentiment
@@ -28,7 +32,7 @@ module Tumbot
 	
 		def check
 			# loop over sumbmissions
-			asks = (@client.submissions @cnf['username'], limit: @cnf['ask_get_limit'])['posts'] 
+			asks = ($client.submissions $USERNAME, limit: $ASK_GET_LIMIT)['posts'] 
 			asks.each do |ask|
 				# create a user if none exists
 				current_user = create_user ask['asking_name']
@@ -39,11 +43,7 @@ module Tumbot
 	
 		def reply ask_id
 			# build our dictionary
-			corpus = Ask.all.map { |i| i.text }.join("\n")
-			@markov.parse_string corpus
-			response = @markov.generate_n_sentences Random.rand(@cnf['ask_min_sentences']..@cnf['ask_max_sentences'])
-			# publish ask
-			@client.edit @cnf['username'], id: "#{ask_id}", answer: response, state: 'published'
+			$client.edit $USERNAME, id: "#{ask_id}", answer: generate_response, state: 'published'
 			@markov.clear!
 			puts 'published an ask!'
 		end
@@ -53,47 +53,33 @@ module Tumbot
 			User.find_or_create_by(username: username)
 		end
 
-		# get emotional state
-		def get_emotions
-			Ask.limit(@cnf['emotional_memory']).reverse_order.average(:sentiment)
-		end
-
 		# reblog a random user's post with a caption
 		def reblog_random_text_post 
 			if User.count > 3
-					user = get_random_user
-					post = get_text_post user, 1, 100
-					reblog(post.id, post.reblog_key, generate_response) if okay_to_reblog? post.body
+				user = Helper.get_random_user
+				puts "Selecting from user #{user.username}"
+				post = Helper.get_text_post user, 1, 100
+				if post
+					puts 'checking if okay to reblog'
+					if Helper.okay_to_reblog? post.body
+						puts 'It\'s good! Reblogging.'
+						Helper.reblog(id: post.id, reblog_key: post.reblog_key, comment: generate_response)
+					else
+						puts 'Wasn\'t good.  Trying again.'
+					  reblog_random_text_post
+					end
+				else
+					puts 'Didn\'t get anything.  Trying again.'
+					reblog_random_text_post
+				end
 			end
-		end
-
-		# will return false if a forbidden word is used
-		# this is to prevent private posts from being reblogged 
-		def okay_to_reblog? content
-			@blacklist.each do |word|
-				return true if content.downcase.include? word
-			end
-		end
-
-		def reblog id, reblog_key, comment
-			@client.reblog(@cnf['username'], id: "#{id}", reblog_key: "#{reblog_key}", comment: "#{comment}")
 		end
 
 		#returns string of a randomized response
 		def generate_response
 			corpus = Ask.all.map { |i| i.text }.join("\n")
 			@markov.parse_string corpus
-			return @markov.generate_n_sentences Random.rand(@cnf['ask_min_sentences']..@cnf['ask_max_sentences'])
-		end
-
-		def get_random_user
-			return User.offset(rand(User.count)).first
-		end
-
-		# get a text post from a blog
-		def get_text_post user, rand_min, rand_max
-			post = @client.posts(user.username, type: 'text', limit: 1, offset: Random.rand(rand_min..rand_max))
-			return TextPost.new(post)
+			return @markov.generate_n_sentences Random.rand($ASK_MIN_SENTENCES..$ASK_MAX_SENTENCES)
 		end
 	end
 end

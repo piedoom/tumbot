@@ -18,3 +18,4 @@ less_often = Thread.new do
 end
 often.join
 less_often.join
+tumbot.reblog_random_text_post

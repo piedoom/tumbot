@@ -4,7 +4,7 @@ require 'erb'
 require_relative 'helper.rb'
 
 #settings class for our tumblr bot
-module Tumbot 
+module Tumbot
 	cnf = YAML.load(ERB.new(File.read('config/config.yml')).result)
 	$USERNAME = cnf['username']
 	$REPLY_RANDOMNESS = cnf['reply_randomness']
@@ -12,8 +12,9 @@ module Tumbot
 	$ASK_MIN_SENTENCES = cnf['ask_min_sentences']
 	$ASK_MAX_SENTENCES = cnf['ask_max_sentences']
 	$EMOTIONAL_MEMORY = cnf['emotional_memory']
+	$SEN = Sentimental.new(0)
 
-	class Bot
+	class Bot < Helper
 		def initialize
 			$client = Tumblr::Client.new
 			# initialize our tumblr client
@@ -23,21 +24,14 @@ module Tumbot
 			@sen = Sentimental.new(0)
 		end
 	
-		def create ask, user, sentiment
-				# add punctuation
-				ask += '.' if ask[-1,1] !~ /(\!|\.|\?)/
-				# don't let people spam the same text over and over
-				Ask.create_with(sentiment: sentiment).find_or_create_by(user: user, text: ask)
-		end
-	
 		def check
 			# loop over sumbmissions
 			asks = ($client.submissions $USERNAME, limit: $ASK_GET_LIMIT)['posts'] 
 			asks.each do |ask|
 				# create a user if none exists
 				current_user = create_user ask['asking_name']
-				self.create ask['question'], current_user, @sen.get_score(ask['question'])
-				self.reply ask['id'] 
+				create_ask ask['question'], current_user
+				reply ask['id']
 			end
 		end
 	
@@ -56,20 +50,15 @@ module Tumbot
 		# reblog a random user's post with a caption
 		def reblog_random_text_post 
 			if User.count > 3
-				user = Helper.get_random_user
-				puts "Selecting from user #{user.username}"
-				post = Helper.get_text_post user, 1, 100
-				if post
-					puts 'checking if okay to reblog'
-					if Helper.okay_to_reblog? post.body
-						puts 'It\'s good! Reblogging.'
-						Helper.reblog(id: post.id, reblog_key: post.reblog_key, comment: generate_response)
+				user = get_random_user
+				post = get_text_post user, 1, 1
+				if post != false
+					if okay_to_reblog? post.body
+						reblog(id: post.id, reblog_key: post.reblog_key, comment: generate_response)
 					else
-						puts 'Wasn\'t good.  Trying again.'
 					  reblog_random_text_post
 					end
 				else
-					puts 'Didn\'t get anything.  Trying again.'
 					reblog_random_text_post
 				end
 			end

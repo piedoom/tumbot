@@ -1,31 +1,33 @@
+require 'sanitize'
 module Tumbot
 	class Helper
 		# get a random user from the database
-		def self.get_random_user
+		def get_random_user
 			return User.offset(rand(User.count)).first
 		end
 
 		# gets a text post
 		# user is a User model
 		# rand_min and rand_max can both be 0 for no randomness
-		def self.get_text_post user, rand_min=0, rand_max=0
+		def get_text_post user, rand_min=0, rand_max=0
 			post = $client.posts(user.username, type: 'text', limit: 1, offset: rand(rand_min..rand_max))
 			if post['posts'] != []
-				return TextPost.new(post)
-			else
-				return false
+				post = TextPost.new(post)
+				return post
 			end
+		  return false
 		end
 
-		def self.get_emotions
+		def get_emotions
 			Ask.limit($EMOTIONAL_MEMORY).reverse_order.average(:sentiment)
 		end
 
-		def self.reblog options
+		def reblog options
 			$client.reblog($USERNAME, id: options[:id], reblog_key: options[:reblog_key], comment: options[:comment])
+			puts 'Finished reblogging.'
 		end
 
-		def self.okay_to_reblog? content
+		def okay_to_reblog? content
 			blacklist = ['suicide','don\'t reblog', 'dont reblog', 'depression', 'personal', 'lgbt', 'rape']
 			blacklist.each do |word|
 				 if content.downcase.include? word
@@ -34,5 +36,11 @@ module Tumbot
 			 end
 		end
 
+		def create_ask text, user
+			ask += '.' if ask[-1,1] !~ /(\!|\.|\?)/
+			sentiment = $SEN.get_score(text) 
+			Ask.create_with(sentiment: sentiment).find_or_create_by(user: user, text: Sanitize.fragment(text))
+			puts "Added ask #{Sanitize.fragment(text)} by #{user}"
+		end
 	end
 end

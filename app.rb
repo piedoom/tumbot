@@ -1,10 +1,20 @@
 require_relative 'initialize.rb'
 tumbot = Tumbot::Bot.new
 
-while true
-	#Thread.new do
+#tumbot.reblog_random_text_post
+puts 'Doomybot started!'
+often = Thread.new do
+	loop do
 		tumbot.check
-		#tumbot.index
-		sleep 6
-	#end
+		sleep 6	
+	end
 end
+less_often = Thread.new do
+	loop do
+		puts 'Reblogging a post'
+		tumbot.reblog_random_text_post
+		sleep 20.minutes
+	end
+end
+often.join
+less_often.join

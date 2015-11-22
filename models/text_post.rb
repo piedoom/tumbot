@@ -1,5 +1,4 @@
 require 'nokogiri'
-require_relative '../helper.rb'
 #not an activerecord object!  Just a regular old object.
 
 class TextPost
@@ -15,6 +14,7 @@ class TextPost
 			a.parent.remove
 		end
 		doc.search('img').each do |img|
+			Image.create(url: img['src'])
 			img.parent.remove
 		end
 		values = (doc.css("p"))

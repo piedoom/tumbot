@@ -64,7 +64,7 @@ module Tumbot
 		def reblog_random_text_post 
 			if User.count > 3
 				user = get_random_user
-				post = get_text_post user, 1, 1
+				post = get_text_post user, 1, 100
 				if post != false
 					if okay_to_reblog? post.body
 						# add to database
@@ -88,8 +88,5 @@ module Tumbot
 			@markov.parse_string corpus
 			return @markov.generate_n_sentences Random.rand($ASK_MIN_SENTENCES..$ASK_MAX_SENTENCES)
 		end
-
-		
-
 	end
 end

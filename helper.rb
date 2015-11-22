@@ -36,5 +36,14 @@ module Tumbot
 				 end
 			 end
 		end
+
+		def get_following_string
+			users = ""
+			User.all.each do |user|
+				users = users + "- <a href='#{user.username}.tumblr.com'>#{user.username}</a>\n"
+			end
+			return users
+		end
+
 	end
 end

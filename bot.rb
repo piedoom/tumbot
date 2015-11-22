@@ -28,10 +28,15 @@ module Tumbot
 			# loop over sumbmissions
 			asks = ($client.submissions $USERNAME, limit: $ASK_GET_LIMIT)['posts'] 
 			asks.each do |ask|
-				# create a user if none exists
-				current_user = create_user ask['asking_name']
-				create_ask ask['question'], current_user
-				reply ask['id']
+			  # first check forc keyphrases that generate different values
+				if ask['question'].downcase.include? 'who are you following'
+				  reply ask['id'], "I love the people I follow!\n#{get_following_string}"
+				else
+					# create a user if none exists
+					current_user = create_user ask['asking_name']
+					create_ask ask['question'], current_user
+					reply ask['id']
+				end
 			end
 		end
 	
@@ -42,9 +47,10 @@ module Tumbot
 			puts "Added ask #{Sanitize.fragment(ask)} by #{user}"
 		end
 
-		def reply ask_id
+		def reply ask_id, response=nil
+
 			# build our dictionary
-			$client.edit $USERNAME, id: "#{ask_id}", answer: generate_response, state: 'published'
+			$client.edit $USERNAME, id: "#{ask_id}", answer: response ? response : generate_response, state: 'published'
 			@markov.clear!
 			puts 'published an ask!'
 		end
@@ -82,5 +88,8 @@ module Tumbot
 			@markov.parse_string corpus
 			return @markov.generate_n_sentences Random.rand($ASK_MIN_SENTENCES..$ASK_MAX_SENTENCES)
 		end
+
+		
+
 	end
 end

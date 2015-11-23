@@ -20,6 +20,8 @@ Configuring the bot is easy enough - all files you need are included in the `con
 
 Both `config.yml` and `credentials.yml` allow for embedded ruby.
 
+##TODO:
+rewrite entire app again.  It's gone through so many changes that a rewrite is needed in order to get things legible.
 
 ##Running
 

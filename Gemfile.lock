@@ -16,6 +16,7 @@ GEM
       tzinfo (~> 1.1)
     arel (6.0.3)
     builder (3.2.2)
+    colorize (0.7.7)
     crass (1.0.2)
     faraday (0.9.2)
       multipart-post (>= 1.2, < 3)
@@ -59,6 +60,7 @@ PLATFORMS
 
 DEPENDENCIES
   activerecord
+  colorize
   logger
   marky_markov
   sanitize

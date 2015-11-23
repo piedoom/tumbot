@@ -18,7 +18,6 @@ class TextPost
 			img.parent.remove
 		end
 		values = (doc.css("p"))
-
 		#stuff we can add to the database
 		@content = values.to_a
 	end

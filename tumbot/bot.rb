@@ -5,6 +5,7 @@ require 'yaml'
 require 'erb'
 require 'marky_markov'
 require 'sanitize'
+require 'colorize'
 
 module Tumbot
 	class Bot	
@@ -14,21 +15,22 @@ module Tumbot
 	
 		@@client = Tumblr::Client.new
 		@@username = cnf['username']
+		Sentimental.load_defaults
 		@@sen = Sentimental.new(0)
 		@@markov = MarkyMarkov::TemporaryDictionary.new(cnf['reply_randomness'])
 
 
 		# get a user, random if no id is specified
-		def get_user id
+		def get_user id=nil
 			return id ? User.find(id) : User.offset(rand(User.count)).first
 		end
 
 		# get a text post from a user, random if not min and max are specified
 		def get_text_post user, min=0, max=0
-			post = @@client.posts(user.username, type: 'text', limit: 1, pffset: (min..max))
+			post = @@client.posts(user.username, type: 'text', limit: 1, offset: rand(min..max))
 			# if does not return empty array, create a new post
-			post['posts'].empty? ? post = false : post = Textpost.new(post)
-			return post
+			post['posts'].empty? ? post_get = false : post_get = TextPost.new(post)
+			return post_get
 		end
 
 		# return an array of ask objects ready to be created
@@ -37,19 +39,40 @@ module Tumbot
 			asks_list = []
 			asks.each do |ask|
 				user = create_user ask['asking_name']
-				asks_list << Ask.new(sentiment: @@sen.get_score(ask['question']), user: user, text: Sanitize.fragment(ask['question']), tumblr_id: ask['id']) 
+				question = sanitize ask['question']
+				asks_list << Ask.new(sentiment: @@sen.get_score(question), user: user, text: question, tumblr_id: ask['id']) 
 			end
 			return asks_list
 		end
 
+		def sanitize content
+			return Sanitize.fragment(content)
+		end
+
 		# create the ask object in the database
 		def create_ask ask
-			ask.save
+			# add punctuation
+			ask.text = ask.text + '.' if ask[-1..1] !~ /(\!|\.|\?)/
+			if ask.save
+				puts "Saved ask from #{ask.user.username}".yellow
+			else
+				puts "Problem saving ask from #{ask.user.username}".red
+			end
 		end
 
 		def reply_ask ask, response=nil
-			puts ask.inspect
 			@@client.edit(@@username, id: ask.tumblr_id, answer: response ? response : generate_response, state: 'published')
+			puts "Published ask from #{ask.user.username}!\n".green
+		end
+		
+		# create ask objects in database
+		# these asks have no user, and are passed in as an array of strings 
+		def create_multiple_entries asks
+			asks.each do |ask|
+				ask = sanitize ask
+				Ask.create(user: nil, text: ask, sentiment: @@sen.get_score(ask))
+			end
+			puts "Created multiple asks!".green
 		end
 
 		def generate_response
@@ -69,14 +92,22 @@ module Tumbot
 		end
 
 		# reblog a post
-		def reblog options
-			@@client.reblog(@@doomybot, id: options[:id], reblog_key: options[:reblog_key], comment: options[:comment])
+		def reblog post
+			#@@client.reblog(@@doomybot, id: options[:id], reblog_key: options[:reblog_key], comment: options[:comment])
+			#puts post.inspect
+			@@client.reblog(@@username, id: post.id, reblog_key: post.reblog_key, comment: generate_response)
+			puts "Reblogged post #{post.id}!\n".green
 		end
 
 		# see if post contains content we woudn't want to make light of
-		def contains_forbidden_word? content
+		def is_forbidden? content
 			blacklist = ['suicide','rape','don\'t reblog', 'dont reblog', 'depression', 'personal', 'lgbt', 'rape']
-			blacklist.each { |word| return true if content.downcase.include? word }
+			blacklist.each do |word| 
+				if content.body.downcase.include? word
+					return true
+				end
+			end
+			return false
 		end
 
 		# get a string of followers

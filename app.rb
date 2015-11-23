@@ -17,5 +17,12 @@ less_often = Thread.new do
 		sleep 900 # 15 minutes
 	end
 end
+rarely = Thread.new do
+	loop do
+		tumbot.post_haiku
+		sleep 3600 # one hour
+	end
+end
 often.join
 less_often.join
+#rarely.join

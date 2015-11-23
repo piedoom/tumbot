@@ -33,5 +33,11 @@ module Tumbot
 			end
 		end
 
+		def post_haiku
+			puts 'Generating a haiku...'.yellow
+			create_text_post(body: generate_haiku, title: generate_response(words: 3))
+			puts "Posted haiku!\n".green
+		end
+
 	end
 end

@@ -80,10 +80,16 @@ module Tumbot
 			return text + '.' if text[-1..1] !~ /(\!|\.|\?)/
 		end
 
-		def generate_response
+		def create_text_post block=nil
+			@@client.text(@@username, title: block[:title], body: block[:body])
+		end
+
+		def generate_response options=nil
 			corpus = (Ask.all.map { |i| i.text }.join("\n")+'common I am we is the word there their.')
 			@@markov.parse_string corpus
-			return @@markov.generate_n_sentences rand(1..2)
+			return @@markov.generate_n_sentences rand(1..2) if !options
+			return @@markov.generate_n_words options[:words] if options[:words]
+			return @@markov.generate_n_sentences options[:sentences] if options[:sentences]
 		end
 
 		# find or create a user
@@ -122,6 +128,47 @@ module Tumbot
 				users = users + "- <a href='#{user.username}.tumblr.com'>#{user.username}</a>\n"
 			end
 			return users
+		end
+
+		# generate a poem
+		def generate_haiku
+			# get enough words so that if they all had 1 syl, it would work
+			# this isn't perfect
+			# sometimes the haiku will have one extra syllable
+
+			base = generate_response(words: 17)
+			hash = tokenize_syllables base
+			final = ""
+			syllable_count = 0
+
+			hash.each do |k,v|
+				if syllable_count < 17
+					final += "#{k} "
+					syllable_count += v
+					final += "\n" if syllable_count == 5 || syllable_count == 12
+				end
+			end
+			
+			return final
+		end
+
+		# take in a string and return a dictionary of each word and their syllables
+		def tokenize_syllables words
+			words_array = words.gsub(/\s+/m, ' ').strip.split(" ")
+			final_hash = Hash.new
+			words_array.each do |word|
+				word = sanitize(word)
+				final_hash.store(word,count_syllables(word))
+			end
+			return final_hash
+		end
+
+		def count_syllables word
+			word.downcase!
+			return 1 if word.length <= 3
+			word.sub!(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '')
+			word.sub!(/^y/, '')
+		  return word.scan(/[aeiouy]{1,2}/).size
 		end
 	end
 end

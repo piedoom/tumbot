@@ -52,7 +52,7 @@ module Tumbot
 		# create the ask object in the database
 		def create_ask ask
 			# add punctuation
-			ask.text = ask.text + '.' if ask[-1..1] !~ /(\!|\.|\?)/
+			ask.text = add_punctuation ask.text
 			if ask.save
 				puts "Saved ask from #{ask.user.username}".yellow
 			else
@@ -70,9 +70,14 @@ module Tumbot
 		def create_multiple_entries asks
 			asks.each do |ask|
 				ask = sanitize ask
+				ask = add_punctuation ask
 				Ask.create(user: nil, text: ask, sentiment: @@sen.get_score(ask))
 			end
 			puts "Created multiple asks!".green
+		end
+		
+		def add_punctuation text
+			return text + '.' if text[-1..1] !~ /(\!|\.|\?)/
 		end
 
 		def generate_response

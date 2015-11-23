@@ -5,8 +5,8 @@ tumbot = Tumbot::Client.new
 #tumbot.reblog_random_text_post
 puts 'Doomybot started!'
 often = Thread.new do
+	puts 'checking for posts'
 	loop do
-		puts 'checking for posts'
 		tumbot.check
 		sleep 6	
 	end

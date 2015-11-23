@@ -1,7 +1,6 @@
-require 'tumblr_client'
 require 'active_record'
-require 'sentimental'
-require_relative 'bot.rb'
+require 'erb'
+require 'tumblr_client'
 Dir["models/*.rb"].each {|file| require_relative file }
 
 cfg = YAML.load(ERB.new(File.read('config/credentials.yml')).result)
@@ -17,3 +16,4 @@ ActiveRecord::Base.establish_connection(
 	adapter: 'sqlite3',
 	database: 'tumbot.db'
 )
+

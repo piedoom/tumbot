@@ -20,9 +20,17 @@ end
 rarely = Thread.new do
 	loop do
 		tumbot.post_haiku
-		sleep 3600 # one hour
+		sleep 7200 # two hours
+	end
+end
+cmd = Thread.new do
+	loop do
+		# control with command line
+		command = gets.chomp
+		puts command
 	end
 end
 often.join
 less_often.join
-#rarely.join
+rarely.join
+cmd.join

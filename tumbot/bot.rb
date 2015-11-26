@@ -48,7 +48,7 @@ module Tumbot
 
 		# pixel sort an image
 		def sort_image path
-			type = 3 # rand(0..3)
+			type = rand(0..3)
 			diagonal = [true,false].sample
 			case type
 			when 0
@@ -130,7 +130,7 @@ module Tumbot
 		end
 		
 		def add_punctuation text
-			return text + '.' if text[-1..1] !~ /(\!|\.|\?)/
+			return text + '.' if text[-1..-1] !~ /(\!|\.|\?)/
 		end
 
 		def create_text_post block=nil

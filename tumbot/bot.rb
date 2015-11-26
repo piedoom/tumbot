@@ -29,7 +29,9 @@ module Tumbot
 		def get_text_post user, min=0, max=0
 			post = @@client.posts(user.username, type: 'text', limit: 1, offset: rand(min..max))
 			# if does not return empty array, create a new post
-			post['posts'].empty? ? post_get = false : post_get = TextPost.new(post)
+			if post
+				post['posts'].empty? ? post_get = false : post_get = TextPost.new(post)
+			end
 			return post_get
 		end
 

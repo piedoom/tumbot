@@ -6,5 +6,5 @@ tumbot = Tumbot::Client.new
 puts 'Doomybot started!'
 	loop do
 		tumbot.reblog_random_text_post
-		sleep 900 # 15 minutes
+		sleep 1 
 	end

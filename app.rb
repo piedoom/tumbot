@@ -14,14 +14,8 @@ often = Thread.new do
 end
 less_often = Thread.new do
 	loop do
-		begin 
-			Timeout::timeout(5) do
-				tumbot.reblog_random_text_post
-			end
-			sleep 900 # 15 minutes
-		rescue Timeout::Error
-			puts 'Reblog timed out'.red
-		end
+		tumbot.reblog_random_text_post
+		sleep 900 # 15 minutes
 	end
 end
 rarely = Thread.new do

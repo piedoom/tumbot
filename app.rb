@@ -1,5 +1,6 @@
 require_relative 'initialize.rb'
 require_relative 'tumbot/client.rb'
+require 'timeout'
 tumbot = Tumbot::Client.new
 
 #tumbot.reblog_random_text_post
@@ -13,8 +14,14 @@ often = Thread.new do
 end
 less_often = Thread.new do
 	loop do
-		tumbot.reblog_random_text_post
-		sleep 900 # 15 minutes
+		begin 
+			Timeout::timeout(5) do
+				tumbot.reblog_random_text_post
+			end
+			sleep 900 # 15 minutes
+		rescue Timeout::Error
+			puts 'Reblog timed out'.red
+		end
 	end
 end
 rarely = Thread.new do

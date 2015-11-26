@@ -6,6 +6,8 @@ require 'erb'
 require 'marky_markov'
 require 'sanitize'
 require 'colorize'
+require 'mini_magick'
+require 'pxlsrt'
 
 module Tumbot
 	class Bot	
@@ -23,6 +25,55 @@ module Tumbot
 		# get a user, random if no id is specified
 		def get_user id=nil
 			return id ? User.find(id) : User.offset(rand(User.count)).first
+		end
+
+		# get an image url, random if no id is specified
+		def get_image id=nil
+			return id ? Image.find(id) : Image.offset(rand(Image.count)).first
+		end
+
+		def download_image url
+			dirname = File.dirname('images')
+			FileUtils.mkdir_p(dirname) unless File.directory?(dirname)
+			image = MiniMagick::Image.open(url)
+			image.format 'png' if image.type != 'PNG'
+		 	filename = "images/#{Time.now.to_i}.png"
+			image.write filename
+			return filename
+		end
+
+		def rb
+			return [true,false].sample
+		end
+
+		# pixel sort an image
+		def sort_image path
+			type = 3 # rand(0..3)
+			diagonal = [true,false].sample
+			case type
+			when 0
+				puts 'Generating brute sort...'.blue
+				Pxlsrt::Brute.brute(path, diagonal: diagonal, middle: rb, vertical: rb).save(path)
+			when 1
+				puts 'Generating smart sort...'.blue
+				Pxlsrt::Smart.smart(path, threshold: rand(100..200), diagonal: diagonal).save(path)
+			when 2
+				puts 'Generating kim sort...'.blue
+				Pxlsrt::Kim.kim(path).save(path)
+			when 3
+				puts 'Generating seed sort...'.blue
+				Pxlsrt::Seed.seed(path, threshold: rand(0.1..10), distance: rand(20..50)).save(path)
+			end
+			puts 'Pixel sort successful, uploading...'.yellow
+			return path
+		end
+
+		def post_pixelsort
+			# gets a random image, downloads it, and processes it
+			# image is the path to our image
+			image = (get_image)
+			image_path = sort_image(download_image(image.url))
+			create_photo_post(path: image_path, caption: generate_response)
 		end
 
 		# get a text post from a user, random if not min and max are specified
@@ -84,6 +135,11 @@ module Tumbot
 
 		def create_text_post block=nil
 			@@client.text(@@username, title: block[:title], body: block[:body])
+		end
+
+		def create_photo_post block=nil
+			@@client.photo(@@username, {data: block[:path], caption: block[:caption]})
+			puts "Published a photo post!\n".green
 		end
 
 		def generate_response options=nil

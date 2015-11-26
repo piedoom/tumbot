@@ -20,8 +20,14 @@ less_often = Thread.new do
 end
 rarely = Thread.new do
 	loop do
+		tumbot.post_pixelsort
+		sleep 3000 # 50 minutes
+	end
+end
+bidaily = Thread.new do 
+	loop do
 		tumbot.post_haiku
-		sleep 7200 # two hours
+		sleep 43200 
 	end
 end
 cmd = Thread.new do
@@ -34,4 +40,5 @@ end
 often.join
 less_often.join
 rarely.join
+bidaily.join
 cmd.join

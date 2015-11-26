@@ -48,7 +48,7 @@ module Tumbot
 
 		# pixel sort an image
 		def sort_image path
-			type = 3 # rand(0..3)
+			type = rand(0..3)
 			diagonal = [true,false].sample
 			case type
 			when 0

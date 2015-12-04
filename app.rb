@@ -3,6 +3,8 @@ require_relative 'tumbot/client.rb'
 require 'timeout'
 tumbot = Tumbot::Client.new
 
+Thread.abort_on_exception=true
+
 #tumbot.reblog_random_text_post
 puts 'Doomybot started!'
 often = Thread.new do
@@ -35,6 +37,7 @@ cmd = Thread.new do
 		# control with command line
 		command = gets.chomp
 		puts command
+		tumbot.post_pixelsort
 	end
 end
 often.join

@@ -130,6 +130,7 @@ module Tumbot
 		end
 		
 		def add_punctuation text
+			text = text.rstrip
 			return text + '.' if text[-1..-1] !~ /(\!|\.|\?)/
 		end
 

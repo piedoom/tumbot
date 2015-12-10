@@ -149,6 +149,7 @@ module Tumbot
 			return @@markov.generate_n_sentences rand(1..2) if !options
 			return @@markov.generate_n_words options[:words] if options[:words]
 			return @@markov.generate_n_sentences options[:sentences] if options[:sentences]
+			@@markov.clear!
 		end
 
 		# find or create a user
@@ -171,7 +172,7 @@ module Tumbot
 
 		# see if post contains content we woudn't want to make light of
 		def is_forbidden? content
-			blacklist = ['suicide','rape','don\'t reblog', 'dont reblog', 'depression', 'personal', 'lgbt', 'rape']
+			blacklist = ['nigger','kike','chink','coon','gook','jap','niglet','polack','pollock','towel head','suicide','rape','don\'t reblog', 'dont reblog', 'depression', 'personal', 'lgbt', 'rape']
 			blacklist.each do |word| 
 				if content.body.downcase.include? word
 					return true

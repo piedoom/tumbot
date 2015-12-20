@@ -149,12 +149,16 @@ module Tumbot
 			get_emotions >= 0 ? 'happy' : 'sad'
 		end
 
+		def emotions_bool? e
+			e >= 0 ? true : false
+		end
+
 		def create_audio_post
 			# generate the audio
 			song = Tumbot::Music.new
 			emotions = get_emotions
 			puts "Publishing a #{happy_or_sad} song (#{emotions})".yellow
-			song.create_song emotions
+			song.create_song(emotions_bool? emotions)
 			song.save_and_render()
 			title = "<h1>#{generate_response(words: 1, emotions: emotions)}</h1>"
 			caption = generate_response(sentences: 2, emotions: emotions)

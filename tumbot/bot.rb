@@ -8,6 +8,8 @@ require 'sanitize'
 require 'colorize'
 require 'mini_magick'
 require 'pxlsrt'
+require 'rest_client'
+require_relative 'music'
 
 module Tumbot
 	class Bot	
@@ -141,6 +143,18 @@ module Tumbot
 		def create_photo_post block=nil
 			@@client.photo(@@username, {data: block[:path], caption: block[:caption]})
 			puts "Published a photo post!\n".green
+		end
+
+		def create_audio_post
+			# generate the audio
+			song = Tumbot::Music.new
+			song.create_song true
+			song.save_and_render()
+			name = generate_response(words: 1)
+
+			# post audio to external site since tumblr has limitations
+			extmp3 = JSON.parse(RestClient.post('https://upload.clyp.it/upload', audioFile: File.new(song.filename)))
+			@@client.audio(@@username, {caption: "<h1>#{name}</h1> #{generate_response}", external_url: extmp3['Mp3Url'], tags: 'audio,music,ai,generated'})
 		end
 
 		def generate_response options=nil

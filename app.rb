@@ -22,8 +22,10 @@ less_often = Thread.new do
 end
 rarely = Thread.new do
 	loop do
+		tumbot.create_audio_post
+		sleep 500
 		tumbot.post_pixelsort
-		sleep 3000 # 50 minutes
+		sleep 2500 # 50 minutes total
 	end
 end
 bidaily = Thread.new do 

@@ -3,7 +3,7 @@ require_relative 'tumbot/client.rb'
 require 'timeout'
 tumbot = Tumbot::Client.new
 
-#Thread.abort_on_exception=true
+Thread.abort_on_exception=true
 
 #tumbot.reblog_random_text_post
 puts 'Doomybot started!'

@@ -116,7 +116,7 @@ module Tumbot
 		end
 
 		def reply_ask ask, response=nil
-			@@client.edit(@@username, id: ask.tumblr_id, answer: response ? response : generate_response, state: 'published')
+			puts @@client.edit(@@username, id: ask.tumblr_id, answer: response ? response : generate_response(nil, get_emotions), state: 'published', tags: "feeling #{happy_or_sad}")
 			puts "Published ask from #{ask.user.username}!\n".green
 		end
 		
@@ -145,20 +145,31 @@ module Tumbot
 			puts "Published a photo post!\n".green
 		end
 
+		def happy_or_sad
+			get_emotions >= 0 ? 'happy' : 'sad'
+		end
+
 		def create_audio_post
 			# generate the audio
 			song = Tumbot::Music.new
-			song.create_song true
+			emotions = get_emotions
+			puts "Publishing a #{happy_or_sad} song (#{emotions})".yellow
+			song.create_song emotions
 			song.save_and_render()
-			name = generate_response(words: 1)
-
+			title = "<h1>#{generate_response(words: 1, emotions: emotions)}</h1>"
+			caption = generate_response(sentences: 2, emotions: emotions)
 			# post audio to external site since tumblr has limitations
 			extmp3 = JSON.parse(RestClient.post('https://upload.clyp.it/upload', audioFile: File.new(song.filename)))
-			@@client.audio(@@username, {caption: "<h1>#{name}</h1> #{generate_response}", external_url: extmp3['Mp3Url'], tags: 'audio,music,ai,generated'})
+			@@client.audio(@@username, caption: title + caption, external_url: extmp3['Mp3Url'], tags: "feeling #{happy_or_sad}, audio,music")
+			puts "Published a song!".green
 		end
 
-		def generate_response options=nil
-			corpus = (Ask.all.map { |i| i.text }.join("\n")+'common I am we is the word there their.')
+		def generate_response options=nil, emotions= -100000
+			corpus = (Ask.all.map { |i| i.text }.join("\n")+'common I am we is the word there their.') unless emotions != -100000
+			# select happy asks
+			corpus = (Ask.where("sentiment >= 0").map { |i| i.text }.join("\n")+'common I am we is the word there their.') if emotions >= 0
+			# select sad asks
+			corpus = (Ask.where("sentiment < 0").map { |i| i.text }.join("\n")+'common I am we is the word there their.') if emotions	< 0
 			@@markov.parse_string corpus
 			return @@markov.generate_n_sentences rand(1..2) if !options
 			return @@markov.generate_n_words options[:words] if options[:words]
@@ -171,8 +182,9 @@ module Tumbot
 			return User.find_or_create_by(username: username)			
 		end
 
-		# get the average sentiment
-		def get_emotions memory=nil
+		# get the average sentiment based on last 10 asks by default
+		# set to nil for infinite memory
+		def get_emotions memory=10
 			return Ask.limit(memory).reverse_order.average(:sentiment)
 		end
 
@@ -180,7 +192,7 @@ module Tumbot
 		def reblog post
 			#@@client.reblog(@@doomybot, id: options[:id], reblog_key: options[:reblog_key], comment: options[:comment])
 			#puts post.inspect
-			@@client.reblog(@@username, id: post.id, reblog_key: post.reblog_key, comment: generate_response)
+			@@client.reblog(@@username, id: post.id, reblog_key: post.reblog_key, comment: generate_response, tags: "feeling #{happy_or_sad}")
 			puts "Reblogged post #{post.id}!\n".green
 		end
 

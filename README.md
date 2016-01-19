@@ -14,19 +14,23 @@ and then
 
 `rake migrate`
 
-Configuring the bot is easy enough - all files you need are included in the `config` directory.
+Config of the bot is a little ugly right now.
+Modify the constants in lib/doomybot.rb
 
-`config.yml` specifies the bot's behavior
 
-`credentials.yml` specifies the Tumblr API credentials
-
-`database.yml` gives the settings for ActiveRecord.  They work as-is, but you can change them if you'd rather work with Postgres or MySQL.  
-
-Both `config.yml` and `credentials.yml` allow for embedded ruby.
-
-##TODO:
-rewrite entire app again.  It's gone through so many changes that a rewrite is needed in order to get things legible.
 
 ##Running
 
-simply run with `ruby app.rb`
+To run the bot, enter the following from the root folder
+
+```bash
+bin/app
+```
+
+To experiment with the bot, run the following from the root folder
+
+```bash
+bin/console
+```
+
+You will then have access to all of the methods on demand.

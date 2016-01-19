@@ -40,10 +40,14 @@ build/
 
 *.db
 *.log
+*.log
 *.swp
+
+*.idea/
 
 #ignore soundfonts
 *.sf2
 *.mid
 *.wav
 *.mp3
+

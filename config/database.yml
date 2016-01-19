@@ -1,5 +1,5 @@
 adapter: sqlite3
 encoding: utf8
-database: tumbot.db
+database: Doomybot.db
 #username:
 #password:

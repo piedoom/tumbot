@@ -51,7 +51,7 @@ module Doomybot
                             type: 'text',
                             limit: 1,
                             offset: rand(1..100))
-        if post_hash['posts'][0]['id']
+        if post_hash.nil? == false
           # create a new TextPost object with our info
           post = TextPost.new(post_hash)
           # add the content of our text post to the database of asks

@@ -30,7 +30,7 @@ module Doomybot
       # init tumblr client
       client = Tumblr::Client.new
       asks.each do |ask|
-        puts client.edit(USERNAME,
+        client.edit(USERNAME,
                          id: ask.tumblr_id,
                          answer: generate_response,
                          state: 'published',
@@ -51,7 +51,7 @@ module Doomybot
                             type: 'text',
                             limit: 1,
                             offset: rand(1..100))
-        if post_hash.nil? == false
+        if !post_hash.empty?
           # create a new TextPost object with our info
           post = TextPost.new(post_hash)
           # add the content of our text post to the database of asks

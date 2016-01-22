@@ -51,7 +51,12 @@ module Doomybot
                             type: 'text',
                             limit: 1,
                             offset: rand(1..100))
-        if !post_hash.empty?
+        puts post_hash
+        if post_hash['status'] == 404
+          puts 'Nothing found for that user.'
+          # try again if no user posts are found
+          reblog_random_text_post
+        else
           # create a new TextPost object with our info
           post = TextPost.new(post_hash)
           # add the content of our text post to the database of asks
@@ -67,9 +72,6 @@ module Doomybot
                         reblog_key: post.reblog_key,
                         comment: generate_response,
                         tags: "feeling #{get_sentiment(to_string: true)}")
-        else
-          # try again if no user posts are found
-          reblog_random_text_post
         end
       end
     end

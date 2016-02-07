@@ -123,7 +123,9 @@ module Doomybot
     # returns a number or string
     def self.get_sentiment(memory: 10, to_string: false)
       average_sum = 0
-      Ask.last(memory).each do |ask|
+      #Ask.last(memory).each do |ask|
+      # instead of a memory, we now get asks counted at the start of every day, so Doomybot's emotions are less sporadic
+      Ask.where("created_at >= ?", Time.now.beginning_of_day).each do |ask|
         average_sum += ask.sentiment.to_f
       end
       number = average_sum / memory

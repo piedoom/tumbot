@@ -18,7 +18,7 @@ require_relative 'doomybot/client'
 module Doomybot
 
   ROOT_PATH = Dir.pwd
-  USERNAME = 'doomybottest'
+  USERNAME = 'doomybot'
 
   # init tumblr
   Tumblr.configure do |config|

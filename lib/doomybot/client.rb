@@ -156,7 +156,7 @@ module Doomybot
         elsif number <= -0.2 and number > -0.3
           state = 'not good'
         elsif number <= -0.3 and number > -0.4
-          state = 'bad'
+          state = 'sad'
         elsif number <= -0.4 and number > -0.5
           state = 'awful'
         elsif number <= -0.5 and number > -0.6

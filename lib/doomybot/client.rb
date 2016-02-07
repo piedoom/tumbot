@@ -122,7 +122,57 @@ module Doomybot
 
     # returns a number or string
     def self.get_sentiment(memory: 10, to_string: false)
-      number = Ask.limit(memory).reverse_order.average(:sentiment).to_f
+      average_sum = 0
+      Ask.last(memory).each do |ask|
+        average_sum += ask.sentiment.to_f
+      end
+      number = average_sum / memory
+
+      # return a string or number depending
+      if to_string
+        # probably better accomplished with yaml or something
+        if number >= 0 and number < 0.1
+          state = 'ok'
+        elsif number >= 0.1 and number < 0.2
+          state = 'fine'
+        elsif number >= 0.2 and number < 0.3
+          state = 'pretty ok'
+        elsif number >= 0.3 and number < 0.4
+          state = 'good'
+        elsif number >= 0.4 and number < 0.5
+          state = 'great'
+        elsif number >= 0.5 and number < 0.6
+          state = 'happy'
+        elsif number >= 0.6 and number < 0.7
+          state = 'really happy'
+        elsif number >= 0.7 and number < 0.8
+          state = 'fantastic'
+        elsif number >= 0.8 and number < 1
+          state = 'ASCENDED'
+        elsif number < 0 and number > -0.1
+          state = 'eh'
+        elsif number <= -0.1 and number > -0.2
+          state = 'not great'
+        elsif number <= -0.2 and number > -0.3
+          state = 'not good'
+        elsif number <= -0.3 and number > -0.4
+          state = 'bad'
+        elsif number <= -0.4 and number > -0.5
+          state = 'awful'
+        elsif number <= -0.5 and number > -0.6
+          state = 'terrible'
+        elsif number <= -0.6 and number > -0.7
+          state = 'depressed'
+        elsif number <= -0.7 and number > -0.8
+          state = 'worse than ever'
+        elsif number <= -0.8 and number > -1
+          state = 'DREAD AND DEATH'
+        end
+        return state
+      else
+        return number
+      end
+
       number >= 0 ? emotional_state = 'happy' : emotional_state = 'sad'
       to_string ? emotional_state : number
     end

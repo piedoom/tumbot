@@ -5,7 +5,7 @@ class String
     Sentimental.load_defaults
     analyzer = Sentimental.new
     puts self
-    analyzer.get_score(self)
+    analyzer.get_score(self).to_f
   end
 
   def add_punctuation

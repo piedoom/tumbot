@@ -10,7 +10,7 @@ puts 'Doomybot started!'
 asks = Thread.new do
   loop do
     Doomybot::Client.get_and_reply_to_asks
-    sleep 5
+    sleep 20
   end
 end
 others = Thread.new do

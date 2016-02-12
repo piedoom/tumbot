@@ -12,7 +12,7 @@ module Doomybot
       # init tumblr client
       client = Tumblr::Client.new
       # get array of asks
-      asks = (client.submissions USERNAME, limit: 3)['posts']
+      asks = (client.submissions USERNAME, limit: 6)['posts']
       # create our ClientAsk objects
       asks_list = []
       asks.each do |ask|
@@ -22,18 +22,30 @@ module Doomybot
                              text: ask['question'].add_punctuation,
                              tumblr_id: ask['id'])
       end
-      reply_to_asks asks_list
+      reply_to_asks(asks_list) if asks_list.count > 0
     end
 
     # replys to asks.  Takes an array of Ask objects
     def self.reply_to_asks asks
       # init tumblr client
       client = Tumblr::Client.new
+
+      ##### TEMPORARY PATCH TO KEEP ASK FLOODS ######
+      # will start to private asks if they are less than a minute apart #
+      # YES this WILL chain #
+
+      last_ask = Ask.find(asks.first.id - 1)
+      post_ok = last_ask.created_at < (Time.now - 30.seconds)
+      post_ok ? state = 'published' : state = 'private'
+
+      #########################
+	
+
       asks.each do |ask|
         client.edit(USERNAME,
                          id: ask.tumblr_id,
                          answer: generate_response,
-                         state: 'published',
+                         state: state,
                          tags: "feeling #{get_sentiment(to_string: true)}")
         puts "Published ask from #{ask.user.username}!\n"
       end
@@ -133,41 +145,42 @@ module Doomybot
       # return a string or number depending
       if to_string
         # probably better accomplished with yaml or something
-        if number >= 0 and number < 0.1
+	os = 2 # offset for emotions.  bigger numbers make emotions fluctuate less
+        if number >= 0 * os and number < 0.1 * os
           state = 'ok'
-        elsif number >= 0.1 and number < 0.2
+        elsif number >= 0.1 * os and number < 0.2 * os
           state = 'fine'
-        elsif number >= 0.2 and number < 0.3
+        elsif number >= 0.2 * os and number < 0.3 * os
           state = 'pretty ok'
-        elsif number >= 0.3 and number < 0.4
+        elsif number >= 0.3 * os and number < 0.4 * os
           state = 'good'
-        elsif number >= 0.4 and number < 0.5
+        elsif number >= 0.4 * os and number < 0.5 * os
           state = 'great'
-        elsif number >= 0.5 and number < 0.6
+        elsif number >= 0.5 * os and number < 0.6 * os
           state = 'happy'
-        elsif number >= 0.6 and number < 0.7
+        elsif number >= 0.6 * os and number < 0.7 * os
           state = 'really happy'
-        elsif number >= 0.7 and number < 0.8
+        elsif number >= 0.7 * os and number < 0.8 * os
           state = 'fantastic'
-        elsif number >= 0.8 and number < 1
+        elsif number >= 0.8 * os
           state = 'ASCENDED'
-        elsif number < 0 and number > -0.1
+        elsif number < 0 * os and number > -0.1 * os
           state = 'eh'
-        elsif number <= -0.1 and number > -0.2
+        elsif number <= -0.1 * os and number > -0.2 * os
           state = 'not great'
-        elsif number <= -0.2 and number > -0.3
+        elsif number <= -0.2 * os and number > -0.3 * os
           state = 'not good'
-        elsif number <= -0.3 and number > -0.4
+        elsif number <= -0.3 * os and number > -0.4 * os
           state = 'sad'
-        elsif number <= -0.4 and number > -0.5
+        elsif number <= -0.4 * os and number > -0.5 * os
           state = 'awful'
-        elsif number <= -0.5 and number > -0.6
+        elsif number <= -0.5 * os and number > -0.6 * os
           state = 'terrible'
-        elsif number <= -0.6 and number > -0.7
+        elsif number <= -0.6 * os and number > -0.7 * os
           state = 'depressed'
-        elsif number <= -0.7 and number > -0.8
+        elsif number <= -0.7 * os and number > -0.8 * os
           state = 'worse than ever'
-        elsif number <= -0.8 and number > -1
+        elsif number <= -0.8 * os
           state = 'DREAD AND DEATH'
         end
         return state

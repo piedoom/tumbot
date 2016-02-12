@@ -51,6 +51,11 @@ module Doomybot
       end
     end
 
+    def self.get_random_user
+        offset = rand(User.count)
+        return User.offset(offset).first
+    end
+
     # reblog a random text post
     def self.reblog_random_text_post
       client = Tumblr::Client.new
@@ -86,6 +91,32 @@ module Doomybot
                         tags: "feeling #{get_sentiment(to_string: true)}")
         end
       end
+    end
+
+    def self.post_text_post
+        puts 'creating original text post'
+        client = Tumblr::Client.new
+        text = generate_response
+        title = generate_response(sentences: 1)
+        client.text(USERNAME, title: title, body: text, tags: "feeling #{get_sentiment(to_string: true)}, text")    
+    end
+
+    def self.post_chat_post
+        puts "generating conversation"
+        users = [get_random_user, get_random_user]
+        
+        # how many times to go back and forth
+        quips = rand(1..2)
+
+        client = Tumblr::Client.new
+        
+        conversation = ""
+        quips.times do
+            users.each do |user|
+                conversation += "#{user.username}: #{generate_response(sentences: 1)}\n"
+            end
+        end
+        client.chat(USERNAME, conversation: conversation, tags: "feeling #{get_sentiment(to_string: true)}, #{users[0].username}, #{users[1].username}, chat, fanfic")
     end
 
     # posts a pixelsorted image

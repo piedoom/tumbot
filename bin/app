@@ -17,10 +17,14 @@ others = Thread.new do
   loop do
     decide = rand(1..10)
     case decide
-      when 1,2,3,4,5,6
+      when 1,2,3
         Doomybot::Client.reblog_random_text_post
-      when 7,8,9,10
+      when 4,5
+        Doomybot::Client.post_text_post
+      when 6,7
         Doomybot::Client.post_pixelsort
+      when 8,9,10
+        Doomybot::Client.post_chat_post
     end
     sleep 1200
   end

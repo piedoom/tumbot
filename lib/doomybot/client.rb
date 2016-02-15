@@ -31,12 +31,13 @@ module Doomybot
       client = Tumblr::Client.new
 
       ##### TEMPORARY PATCH TO KEEP ASK FLOODS ######
-      # will start to private asks if they are less than a minute apart #
+      # will start to queue asks if they are less than a minute apart #
       # YES this WILL chain #
 
       last_ask = Ask.find(asks.first.id - 1)
       post_ok = last_ask.created_at < (Time.now - 30.seconds)
-      post_ok ? state = 'published' : state = 'private'
+      #post_ok ? state = 'published' : state = 'queue'
+      state = 'published'
 
       #########################
 	
@@ -46,6 +47,7 @@ module Doomybot
                          id: ask.tumblr_id,
                          answer: generate_response,
                          state: state,
+                         is_private: true,
                          tags: "feeling #{get_sentiment(to_string: true)}")
         puts "Published ask from #{ask.user.username}!\n"
       end
